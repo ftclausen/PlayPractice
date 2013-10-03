@@ -3,6 +3,7 @@
 # ~~~~
 
 # Home page
+POST     /                        controllers.Application.index()
 GET     /                        controllers.Application.index()
 GET     /hello/:name             controllers.Application.hello(name)
 GET     /signin/:name            controllers.Application.signInTheWorld(name)
