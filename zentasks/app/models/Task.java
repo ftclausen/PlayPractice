@@ -3,6 +3,7 @@ package models;
 import java.util.*;
 import javax.persistence.*;
 import play.db.ebean.*;
+import play.Logger;
 
 @Entity
 public class Task extends Model {
@@ -20,6 +21,7 @@ public class Task extends Model {
     public static Model.Finder<Long, Task> find = new Model.Finder(Long.class, Task.class);
 
     public static List<Task> findTodoInvolving(String user) {
+        Logger.debug("Running findTodoInvolving for user " + user);
         return find.fetch("project").where()
                 .eq("done", false)
                 .eq("project.members.email", user)

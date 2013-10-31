@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 import play.test.WithApplication;
 import static play.test.Helpers.*;
 import java.util.*;
+import play.Logger;
 
 public class ModelsTest extends WithApplication {
     @Before
@@ -60,17 +61,18 @@ public class ModelsTest extends WithApplication {
         t1.title = "Do tutorial";
         t1.project = project;
         t1.assignedTo = fred;
-        t1.done = true;
         t1.save();
 
         Task t2 = new Task();
         t2.title = "Do next tutorial";
         t2.project = project;
         t2.assignedTo = jata;
-        t2.done = true;
         t2.save();
 
-        List<Task> results = Task.findTodoInvolving("fred@example.com");
+        List<Task> results = Task.findTodoInvolving("jata@example.com");
+        for (Task result: results) {
+            Logger.debug("Got task : " + result);
+        }
         assertEquals(1, results.size());
         assertEquals("Do tutorial", results.get(0).title);
     }
