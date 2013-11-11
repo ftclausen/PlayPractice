@@ -7,12 +7,21 @@
 package models;
 
 import models.*;
+
 import org.junit.*;
+import org.yaml.snakeyaml.error.YAMLException;
+
 import static org.junit.Assert.*;
+import play.libs.Yaml;
 import play.test.WithApplication;
 import static play.test.Helpers.*;
+
+import java.io.IOException;
 import java.util.*;
+
 import play.Logger;
+
+import com.avaje.ebean.*;
 
 public class ModelsTest extends WithApplication {
     @Before
@@ -51,10 +60,9 @@ public class ModelsTest extends WithApplication {
 
     @Test
     public void findTodoTasksInvolving() {
+        // TODO: Add multi user todo test
         User fred = new User("fred@example.com", "Fred", "this is a secret");
-        User jata = new User("jata@example.com", "Jata", "jata's secret");
         fred.save();
-        jata.save();
 
         Project project = Project.create("Play 2", "play", "fred@example.com");
         Task t1 = new Task();
@@ -63,18 +71,42 @@ public class ModelsTest extends WithApplication {
         t1.assignedTo = fred;
         t1.save();
 
-        Task t2 = new Task();
-        t2.title = "Do next tutorial";
-        t2.project = project;
-        t2.assignedTo = jata;
-        t2.save();
-
-        List<Task> results = Task.findTodoInvolving("jata@example.com");
+        List<Task> results = Task.findTodoInvolving("fred@example.com");
         for (Task result: results) {
-            Logger.debug("Got task : " + result);
+            Logger.debug("Got task : " + result.title + " with owner " + result.assignedTo.email);
         }
         assertEquals(1, results.size());
         assertEquals("Do tutorial", results.get(0).title);
     }
+
+    @Test
+    public void fullTest() {
+    	try {
+    		Ebean.save((List) Yaml.load("test-data.yml"));
+    	} catch (YAMLException e) {
+    		Logger.error("Cannot prcess test data file : test-data.yml");
+    	}
+    	
+    	// Count all the things
+    	assertEquals(3, User.find.findRowCount());
+    	assertEquals(7, Project.find.findRowCount());
+    	assertEquals(5, Task.find.findRowCount());
+    	
+    	// Auth
+    	assertNotNull(User.authenticate("bob@example.com", "secret"));
+    	assertNotNull(User.authenticate("jane@example.com", "secret"));
+    	assertNull(User.authenticate("jeff@example.com", "secret not correct"));
+    	assertNull(User.authenticate("tom@example.com", "secret not correct"));
+    	
+    	// Find all Bob's projects
+    	List<Project> bobsProjects = Project.findInvolving("bob@example.com");
+    	assertEquals(5, bobsProjects.size());
+    	
+    	// Find all Bob's todos
+    	List<Task> bobsTasks = Task.findTodoInvolving("bob@example.com");
+    	assertEquals(4, bobsTasks.size());
+    	
+    }
 }
+
 
