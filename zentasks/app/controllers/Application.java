@@ -8,11 +8,13 @@ import play.mvc.*;
 import views.html.*;
 import static play.data.Form.*;
 import play.data.*;
+import play.Logger;
 
 public class Application extends Controller {
 
     public static Result javascriptRoutes() {
         response().setContentType("text/javascript");
+        Logger.debug("About to send javascript routes");
         return ok(
                 Routes.javascriptRouter("jsRoutes",
                     controllers.routes.javascript.Projects.add(),
@@ -66,6 +68,7 @@ public class Application extends Controller {
         public String email;
         public String password;
         public String validate() {
+            Logger.debug("Checking login credentials");
             if (User.authenticate(email, password) == null) {
                 return "Invalid user name or password.";
             }
